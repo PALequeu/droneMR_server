@@ -6,30 +6,40 @@ app = Flask(__name__)
 data_handler = DataHandler()
 
 
-@app.route("/")
+
+@app.route("/", methods=["POST"])
 def hello_world():
-    return "<p>Hello, World!</p>"
+    return "<p>DroneMR server</p>"
+    
 
 
 @app.route("/init", methods=["GET", "POST"])
 def init():
     data = request.json
+    print(data)
     response = data_handler.process_data(data)
     return response
 
 
 @app.route("/drones", methods=["GET"])
 def drones():
-    return {
-        "leader": data_handler.leader_drone.name,
-        "slaves": list(data_handler.slave_drones.keys()),
-    }
+    if data_handler.leader_drone == None :
+        return {
+            "leader": data_handler.leader_drone,
+            "slaves" : list(data_handler.slave_drones.keys())
+        }
+    else :
+        return {
+            "leader": data_handler.leader_drone,
+		    "slaves": list(data_handler.slave_drones.keys()),
+        }
 
 
 @app.route("/position/<drone_name>", methods=["POST"])
 def position(drone_name):
     if (drone_name not in data_handler.slave_drones) and (
         drone_name != data_handler.leader_drone.name
+        
     ):
         return {"success": False, "message": "drone not initialized"}
     else:
@@ -41,7 +51,13 @@ def position(drone_name):
 @app.route("/detection", methods=["GET", "POST"])
 def detection():
     data = request.json
-    data_handler.process_data(data)
+    response = data_handler.process_data(data)
+    return response
+
+
+@app.route("/test", methods=["GET", "POST"])
+def test():
+    return str(request.json)
 
     # if request.method == "POST":
     #     print(request)
