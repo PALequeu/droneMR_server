@@ -30,7 +30,7 @@ def drones():
         }
     else :
         return {
-            "leader": data_handler.leader_drone,
+            "leader": data_handler.leader_drone.name,
 		    "slaves": list(data_handler.slave_drones.keys()),
         }
 
@@ -41,8 +41,10 @@ def position(drone_name):
         drone_name != data_handler.leader_drone.name
         
     ):
+        print("problem", drone_name, data_handler.slave_drones, drone_name not in data_handler.slave_drones)
         return {"success": False, "message": "drone not initialized"}
     else:
+        print("no problem")
         data = request.json
         response = data_handler.process_data(data)
         return response
@@ -54,6 +56,10 @@ def detection():
     response = data_handler.process_data(data)
     return response
 
+
+@app.route("/headingCommand/<drone_name>", methods=["GET"])
+def headingCommand(drone_name) :
+    return data_handler.heading_directive_json(drone_name)
 
 @app.route("/test", methods=["GET", "POST"])
 def test():

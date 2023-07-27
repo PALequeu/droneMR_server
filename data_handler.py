@@ -35,13 +35,18 @@ class DataHandler:
         position = drone_info["position"]
 
         # check if drone is leader drone
-        if identification["source"] == self.leader_drone.name:
+        if self.leader_drone != None and identification["source"] == self.leader_drone.name:
             # update drone's position
             self.leader_drone.position = position
             print(self.leader_drone.name + " position updated")
+
+            for drone in self.slave_drones :
+                self.slave_drones[drone].headingDirective = self.get_heading_directive(drone)
+    
             return {"success": True, "message": "drone position updated"}
 
         # else check if drone is slave drone
+        
         elif identification["source"] in self.slave_drones:
             # update drone's position
             self.slave_drones[identification["source"]].position = position
@@ -57,9 +62,24 @@ class DataHandler:
         drone_info = data["droneInformation"]
         identification = drone_info["identification"]
         detection = data["detectedPositions"]
-       
-        #targets = detection["targets"]
 
+        for position in detection :
+            if position.x < self.target.x :
+
+                #go right
+                pass
+            elif position.x > self.target.x :
+                #go left
+                pass
+
+            if position.y < self.target.y :
+                #go up
+                pass
+            if position.y < self.target.y :
+                #go down
+                pass
+            
+        #targets = detection["targets"]
         #couples = self.best_pairing(drone_detection, targets)
         return {"success": True, "message": "Anafi Detected"}
     
@@ -78,6 +98,7 @@ class DataHandler:
                     drone_type,
                     position,
                 )
+                #self.target.append(data["target"])
                 print("leader drone " + identification["source"] + " initialized")
                 return {"success": True, "message": "leader drone initialized"}
             else : 
@@ -93,7 +114,7 @@ class DataHandler:
                     identification["team"],
                     drone_type,
                     position,
-                    identification["color"],
+                    None, #TODO: color
                 )
                 self.slave_drones[identification["source"]] = new_drone
                 print("slave drone " + identification["source"] + " initialized")
@@ -155,6 +176,16 @@ class DataHandler:
     def get_relative_position(self, drone, target):
         # CAREFUL : y axis is inverted tu have the same referential as the drone
         return {"x": target["x"] - drone["x"], "y": -(target["y"] - drone["y"])}
+
+    def get_heading_directive(self, drone):
+        if self.leader_drone != None and type(self.slave_drones[drone].position["heading"]) == float :
+            return self.leader_drone.position["heading"] - self.slave_drones[drone].position["heading"]
+        else :
+            print(0)
+            return 0
+
+    def heading_directive_json(self, drone_name):
+        return str(self.slave_drones[drone_name].headingDirective)
 
 
 if __name__ == "__main__":
