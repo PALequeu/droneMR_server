@@ -11,7 +11,7 @@ class DataHandler:
         self.number_of_slaves = 0
         self.leader_drone = None
         self.slave_drones = {}
-        self.targets = []
+        self.target = Target(1,0,0)
         
 
     def process_data(self, data):
@@ -64,20 +64,13 @@ class DataHandler:
         detection = data["detectedPositions"]
 
         for position in detection :
-            if position.x < self.target.x :
+            print(detection[position])
+            for drone in self.slave_drones :
+                self.slave_drones[drone].coordinates = {
+                    "x": detection[position]["x"],
+                    "y": detection[position]["y"]
+                }
 
-                #go right
-                pass
-            elif position.x > self.target.x :
-                #go left
-                pass
-
-            if position.y < self.target.y :
-                #go up
-                pass
-            if position.y < self.target.y :
-                #go down
-                pass
             
         #targets = detection["targets"]
         #couples = self.best_pairing(drone_detection, targets)
@@ -179,10 +172,35 @@ class DataHandler:
 
     def get_heading_directive(self, drone):
         if self.leader_drone != None and type(self.slave_drones[drone].position["heading"]) == float :
-            return self.leader_drone.position["heading"] - self.slave_drones[drone].position["heading"]
+            heading_difference = self.leader_drone.position["heading"] - self.slave_drones[drone].position["heading"]
+            if heading_difference > 180 :
+                return 180 - (self.leader_drone.position["heading"] - self.slave_drones[drone].position["heading"])
+            elif heading_difference < -180 :
+                return -180 - (self.leader_drone.position["heading"] - self.slave_drones[drone].position["heading"])
+            
+            return (self.leader_drone.position["heading"] - self.slave_drones[drone].position["heading"])
         else :
             print(0)
             return 0
+    
+    def get_move_directive(self, drone):
+        x = self.slave_drones[drone].coordinates["x"]
+        y = self.slave_drones[drone].coordinates["y"]
+        right_directive = 0
+        forward_directive = 0
+        if x < 0.4 :
+            right_directive = 1/x
+        elif x > 0.6 :
+            right_directive = -1/(1-x)
+        if y < 0.4 :
+            forward_directive = -1/y
+        elif y > 0.6 :
+            forward_directive = 1/(1-y)
+        return str({
+            "rightDirective" : right_directive,
+            "forwardDirective" : forward_directive
+        })
+
 
     def heading_directive_json(self, drone_name):
         return str(self.slave_drones[drone_name].headingDirective)
@@ -208,11 +226,10 @@ if __name__ == "__main__":
         "heading": 38.22674853914756
         }
     },
-    "timestamp": 1688716411516
+    "timestamp": 1688716411516,
     }"""
 
-    dh.received_data = message
-    dh.process_data()
+    dh.process_data(message)
 
     ##send slave init message
     message = """{
@@ -222,7 +239,7 @@ if __name__ == "__main__":
         "identification": {
         "team": "test",
         "auth": "egtj-3jqa-z6fh-ete7-wrml",
-        "source": "3_AIR_DRONE-PATROLLER_slave1",
+        "source": "3_AIR_DRONE-PATROLLER_slave",
         "color": "red"
         },
         "position": {
@@ -235,28 +252,6 @@ if __name__ == "__main__":
     "timestamp": 1688716411516
     }"""
 
-    dh.received_data = message
-    dh.process_data()
+    dh.process_data(message)
 
-    message = """{
-    "droneInformation": {
-        "messageType": "init",
-        "droneType": "slave",
-        "identification": {
-        "team": "test",
-        "auth": "egtj-3jqa-z6fh-ete7-wrml",
-        "source": "3_AIR_DRONE-PATROLLER_slave2",
-        "color": "blue"
-        },
-        "position": {
-        "latitude": 48.87912171673277,
-        "longitude": 2.368739850635129,
-        "altitude": 0.41066664457321167,
-        "heading": 38.22674853914756
-        }
-    },
-    "timestamp": 1688716411516
-    }"""
-
-    dh.received_data = message
-    dh.process_data()
+    

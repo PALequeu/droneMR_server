@@ -61,6 +61,10 @@ def detection():
 def headingCommand(drone_name) :
     return data_handler.heading_directive_json(drone_name)
 
+@app.route("/moveCommand/<drone_name>", methods=["GET"])
+def moveCommand(drone_name) :
+    return data_handler.get_move_directive(drone_name)
+
 @app.route("/test", methods=["GET", "POST"])
 def test():
     return str(request.json)
