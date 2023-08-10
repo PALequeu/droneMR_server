@@ -1,4 +1,5 @@
 import numpy as np
+import drone
 
 class HungarianAlgorithm:
         
@@ -98,16 +99,20 @@ class HungarianAlgorithm:
         return cur_mat
 
     def hungarian_algorithm(self,mat): 
+        mat = np.matrix(mat)
+        print("mat", mat)   
         dim = mat.shape[0]
         cur_mat = mat
 
         #Step 1 - Every column and every row subtract its internal minimum
+
         for row_num in range(mat.shape[0]): 
             cur_mat[row_num] = cur_mat[row_num] - np.min(cur_mat[row_num])
         
         for col_num in range(mat.shape[1]): 
             cur_mat[:,col_num] = cur_mat[:,col_num] - np.min(cur_mat[:,col_num])
         zero_count = 0
+
         while zero_count < dim:
             #Step 2 & 3
             ans_pos, marked_rows, marked_cols = self.mark_matrix(cur_mat)

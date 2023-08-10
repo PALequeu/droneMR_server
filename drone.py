@@ -1,3 +1,4 @@
+
 class Drone:
     def __init__(self, name, team, type, position, color=None):
         self.name = name
@@ -9,6 +10,11 @@ class Drone:
         self.coordinates = {"x": 0.5, "y": 0.5}
         self.color = color
         self.target = None
-        self.headingDirective = 0
+        #directive is a dictionnary with keys "forwardDirective", "rightDirective" and "headingdirective"
+        self.directives = {
+            "forwardDirective" : 0,
+            "rightDirective" : 0,
+            "headingDirective" : 0
+        }
     
 

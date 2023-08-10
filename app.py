@@ -1,8 +1,13 @@
 from flask import Flask
-from flask import request
+from flask import request, render_template
 from data_handler import DataHandler
+from turbo_flask import Turbo
+import threading
+import time
+import copy
 
 app = Flask(__name__)
+turbo = Turbo(app)
 data_handler = DataHandler()
 
 
@@ -56,7 +61,6 @@ def detection():
     response = data_handler.process_data(data)
     return response
 
-
 @app.route("/headingCommand/<drone_name>", methods=["GET"])
 def headingCommand(drone_name) :
     return data_handler.heading_directive_json(drone_name)
@@ -68,6 +72,41 @@ def moveCommand(drone_name) :
 @app.route("/test", methods=["GET", "POST"])
 def test():
     return str(request.json)
+
+@app.route("/monitor", methods=["GET"])
+def monitor():
+    dronesBuffer = copy.deepcopy(data_handler.slave_drones)
+    leaderBuffer = copy.deepcopy(data_handler.leader_drone)
+    
+    directives = {}
+    for drone in data_handler.slave_drones :
+        command = data_handler.slave_drones[drone].directives
+        directives[drone] = command
+    return render_template("/index.html", title='Welcome', members=dronesBuffer, leader=leaderBuffer, directives=directives)
+
+
+@app.before_first_request
+def before_first_request():
+    threading.Thread(target=update_load).start()
+
+def update_load():
+    with app.app_context():
+        while True:
+            time.sleep(1)
+            try :
+
+                dronesBuffer = copy.deepcopy(data_handler.slave_drones)
+                leaderBuffer = copy.deepcopy(data_handler.leader_drone)
+                
+                directives = {}
+                for drone in data_handler.slave_drones :
+                    command = data_handler.slave_drones[drone].directives
+                    directives[drone] = command
+                    
+                turbo.push(turbo.replace(render_template('index.html',members=dronesBuffer, leader=leaderBuffer, directives=directives), 'load'))
+            except RuntimeError :
+                print("not ok")
+                pass
 
     # if request.method == "POST":
     #     print(request)

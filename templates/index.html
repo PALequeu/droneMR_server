@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    {{ turbo() }}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .leader-row {
+            background-color: #e0f2ff; /* Couleur de fond pour le leader */
+        }
+    </style>
+</head>
+<body>
+    <turbo-frame id="load">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 30%;">Drone Name</th>
+                    <th>Type</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Heading</th>
+                    <th>Detection</th>
+                    <th>Command</th>
+                    <th>Target</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if leader %}
+                    <tr class="leader-row">
+                        <td>{{ leader.name }}</td>
+                        <td>{{ leader.type }}</td>
+                        <td>{{ leader.position["latitude"] }}</td>
+                        <td>{{ leader.position["longitude"] }}</td>
+                        <td>{{ leader.position["heading"] }}</td>
+                    </tr>
+                {% endif %}
+                {% for member in members %}
+                    <tr>
+                        <td>{{ members[member].name }}</td>
+                        <td>{{ members[member].type }}</td>
+                        <td>{{ members[member].position["latitude"] }}</td>
+                        <td>{{ members[member].position["longitude"] }}</td>
+                        <td>{{ members[member].position["heading"] }}</td>
+                        <td>{{ members[member].coordinates }}</td>
+                        <td>{{ directives[member] }}</td>
+                        {% if members[member].target %}
+                            <td>{{members[member].target.x}}, {{members[member].target.y}}</td>
+                        {% else %}
+                            <td>None</td>
+                        {% endif %}
+                        <td></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </turbo-frame>
+</body>
+</html>
