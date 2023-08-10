@@ -94,6 +94,10 @@ class DataHandler:
                 #self.target.append(data["target"])
                 print("leader drone " + identification["source"] + " initialized")
                 return {"success": True, "message": "leader drone initialized"}
+            elif self.leader_drone.name == identification["source"]:
+                print("leader drone " + identification["source"] + " reconnected")
+                return {"success": True, "message": "leader drone reconnected"}
+                
             else : 
                 print("leader drone already initialized : " + self.leader_drone.name)
                 return {"success": False, "message": "leader drone already initialized"}
@@ -115,7 +119,7 @@ class DataHandler:
             else :
                 print("slave drone with name " + identification["source"] + " already initialized")
                 return {
-                    "success": False,
+                    "success": True,
                     "message": "slave drone with the same name already initialized",
                 }
     

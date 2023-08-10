@@ -101,3 +101,7 @@ def test():
 
 
 # api.add_resource(UserAPI, "/users/<string:name>", endpoint="user")
+
+if __name__ == "__main__":
+            app.run(debug=False, host="0.0.0.0")
+           
